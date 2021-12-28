@@ -3,7 +3,7 @@ import sys
 from scipy import signal
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
-from scipy.signal import spectrogram, lfilter
+from scipy.signal import spectrogram, lfilter, freqz, filtfilt, tf2zpk
 
 segment_index = 1
 
@@ -90,7 +90,6 @@ spec_axis = np.arange(0, fs, fs/len(spec))
 #spec_axis = np.arange(0,len(spec)//2)
 
 
-
 if(task_detect(task_list, 3)):
     plt.plot(spec_axis[:len(spec)//2], np.abs(spec[:len(spec)//2]))
     plt.xlabel('Frequency [Hz]')
@@ -142,7 +141,6 @@ if(task_detect(task_list, 5)):
 
 fx = np.arange(0, len(data), 1)
 fy = 0
-#fy = np.cos(f[0]/fs * 2 * np.pi * fx) + np.cos(f[1]/fs * 2 * np.pi * fx) + np.cos(f[2]/fs * 2 * np.pi * fx) + np.cos(f[3]/fs * 2 * np.pi * fx)
 
 for freq in freqs:
     fy += np.cos(freq/fs * 2 * np.pi * fx)
@@ -164,32 +162,84 @@ if(task_detect(task_list, 6)):
 
 
 #--------------------------------------------------------------------#
-#-------------------------------TASK 6-------------------------------#
+#-------------------------------TASK 7-------------------------------#
+#--------------------------------------------------------------------#
+
+wp_segment = 50
+ws_segment = 5
+
+filtered_data = data
+filt_a = 1
+filt_b = 1
+
+for freq in freqs:
+    N, wn = signal.buttord([freq-wp_segment, freq+wp_segment],
+                           [freq-ws_segment, freq+ws_segment], 3, 40, False, fs)
+    b, a = signal.butter(N, wn, 'bandstop', False, 'ba', fs)
+    filt_a = np.convolve(filt_a, a)
+    filt_b = np.convolve(filt_b, b)
+
+
+#--------------------------------------------------------------------#
+#-------------------------------TASK 8-------------------------------#
+#--------------------------------------------------------------------#
+
+if(task_detect(task_list,8)):
+    z, p, k = tf2zpk(filt_b, filt_a)
+
+    plt.figure(figsize=(4,3.5))
+
+
+    ang = np.linspace(0, 2*np.pi,100)
+    plt.plot(np.cos(ang), np.sin(ang))
+
+
+    plt.scatter(np.real(z), np.imag(z), marker='o', facecolors='none', edgecolors='r', label='zeroes')
+    plt.scatter(np.real(p), np.imag(p), marker='x', color='g', label='ples')
+
+    plt.gca().set_xlabel('Real part $\mathbb{R}\{$z$\}$')
+    plt.gca().set_ylabel('Imaginary part $\mathbb{I}\{$z$\}$')
+
+    plt.grid(alpha=0.5, linestyle='--')
+    plt.legend(loc='upper left')
+
+    plt.tight_layout()
+    plt.draw()
+    plt.savefig('out/filter-zeroaes_and_poles.png')
+    plt.show()
+
+#--------------------------------------------------------------------#
+#-------------------------------TASK 9-------------------------------#
 #--------------------------------------------------------------------#
 
 
-filt = np.full(512, 1)
+if(task_detect(task_list,9)):
+    w, H = freqz(filt_b, filt_a)
+    _, ax = plt.subplots(1, 2, figsize=(8, 3))
+    ax[0].plot(w / 2 / np.pi * fs, np.abs(H))
+    ax[0].set_xlabel('Frequency [Hz]')
+    ax[0].set_title('Modulus of filter frequency response $|H(e^{j\omega})|$')
 
-filt_frame = 80
+    ax[1].plot(w / 2 / np.pi * fs, np.angle(H))
+    ax[1].set_xlabel('Frequency [Hz]')
+    ax[1].set_title('Argument of filter frequency response $\mathrm{arg}\ H(e^{j\omega})$')
 
-filt_frame_tmp = filt_frame/2/fs * 1024
-for freq in freqs:
-    filt[(int)((freq/fs * 1024) - filt_frame_tmp):(int)
-         ((freq/fs * 1024) + filt_frame_tmp)] = 0
+    for ax1 in ax:
+        ax1.grid(alpha=0.5, linestyle='--')
 
-filt2 = np.append(filt, np.flip(filt))
-plt.plot(spec_axis, filt2)
-plt.show()
+    plt.tight_layout()
+    plt.draw()
+    plt.savefig('out/filter_frequency_response.png')
+    plt.show()
 
-imp = np.fft.ifft(filt2)
-imp = np.fft.fftshift(imp)
+#--------------------------------------------------------------------#
+#-------------------------------TASK 10------------------------------#
+#--------------------------------------------------------------------#
 
-plt.plot(imp)
-plt.show()
-
-filtered_data = lfilter(imp, [1], data)
-wavfile.write('audio/clean_spec.wav', fs, np.real(filtered_data))
-
-
-plt.plot(filtered_data)
-plt.show()
+if(task_detect(task_list,10)):
+    filtered_data = filtfilt(filt_b, filt_a, filtered_data)
+    wavfile.write('audio/clean_bandstop.wav', fs, np.real(filtered_data))
+    plt.plot(filtered_data)
+    plt.draw()
+    plt.savefig('out/clean_signal.png')
+    plt.show()
