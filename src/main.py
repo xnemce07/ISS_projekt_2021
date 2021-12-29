@@ -3,7 +3,6 @@ import numpy as np
 from scipy import signal
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
-#from scipy.signal import spectrogram, freqz, filtfilt, tf2zpk
 import cmath as cm
 
 
