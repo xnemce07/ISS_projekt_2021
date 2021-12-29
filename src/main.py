@@ -1,11 +1,13 @@
+from math import pi
 import numpy as np
-import sys
 from scipy import signal
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
-from scipy.signal import spectrogram, lfilter, freqz, filtfilt, tf2zpk
+#from scipy.signal import spectrogram, freqz, filtfilt, tf2zpk
+import cmath as cm
 
-segment_index = 1
+
+segment_index = 4
 
 
 def task_detect(task_list, task_no):
@@ -19,6 +21,24 @@ def task_detect(task_list, task_no):
         if(task_no_str == task):
             return True
     return False
+
+def myDFTmat(N):
+    Wn = cm.exp(-1j* 2 * pi / N )
+    DFTmat = np.zeros((N,N), dtype='complex')
+    for n in range(0,N-1):
+        Wnn = pow(Wn,n)
+        for k in range(0,n):
+            res = pow(Wnn,k)
+            DFTmat[n][k] = res
+            DFTmat[k][n] = res
+    return DFTmat
+
+def myDFT(x):
+    mat = myDFTmat(len(x))
+    return np.matmul(mat,x)
+
+
+
 
 
 print("Choose task numbers separated by ',' or type 'all' for everything")
@@ -84,11 +104,10 @@ if(task_detect(task_list, 2)):
 #--------------------------------------------------------------------#
 #-------------------------------TASK 3-------------------------------#
 #--------------------------------------------------------------------#
-# TODO: make own implementation of dft
 spec = np.fft.fft(data_matrix[segment_index])
 spec_axis = np.arange(0, fs, fs/len(spec))
-#spec_axis = np.arange(0,len(spec)//2)
 
+my_spec = myDFT(data_matrix[segment_index])
 
 if(task_detect(task_list, 3)):
     plt.plot(spec_axis[:len(spec)//2], np.abs(spec[:len(spec)//2]))
@@ -98,15 +117,19 @@ if(task_detect(task_list, 3)):
     plt.savefig(f'out/segment_{segment_index}-spectral_analysis.png')
     plt.show()
 
+    plt.plot(spec_axis[:len(spec)//2], np.abs(my_spec[:len(spec)//2]))
+    plt.xlabel('Frequency [Hz]')
+    plt.title(f'MY segment {segment_index} - My spectral analysis')
+    plt.draw()
+    plt.savefig(f'out/segment_{segment_index}-spectral_analysis_mine.png')
+    plt.show()
 
 #--------------------------------------------------------------------#
 #-------------------------------TASK 4-------------------------------#
 #--------------------------------------------------------------------#
 
 
-freqs, t, sgr = spectrogram(data, fs, nperseg=1024, noverlap=512)
-# prevod na PSD
-# (ve spektrogramu se obcas objevuji nuly, ktere se nelibi logaritmu, proto +1e-20)
+freqs, t, sgr = signal.spectrogram(data, fs, nperseg=1024, noverlap=512)
 sgr_log = 10 * np.log10(sgr+1e-20)
 
 if(task_detect(task_list, 4)):
@@ -123,8 +146,7 @@ if(task_detect(task_list, 4)):
 #--------------------------------------------------------------------#
 
 freqs = [0, 0, 0, 0]
-freqs[0] = (np.argmax(spec[:99]) - 1)/len(spec)*fs
-# freqs[0] = 860
+freqs[0] = 860
 freqs[1] = freqs[0] * 2
 freqs[2] = freqs[0] * 3
 freqs[3] = freqs[0] * 4
@@ -146,7 +168,7 @@ for freq in freqs:
     fy += np.cos(freq/fs * 2 * np.pi * fx)
 
 if(task_detect(task_list, 6)):
-    f, t, sgr = spectrogram(fy, fs, nperseg=1024, noverlap=512)
+    f, t, sgr = signal.spectrogram(fy, fs, nperseg=1024, noverlap=512)
 
     sgr_log = 10 * np.log10(sgr+1e-20)
     plt.pcolormesh(t, f, sgr_log)
@@ -158,7 +180,7 @@ if(task_detect(task_list, 6)):
     plt.draw()
     plt.savefig('out/4cos_spectral_power_density.png')
     plt.show()
-    wavfile.write('audio/4cos.wav', fs, fy/50)  # TODO: level this thing
+    wavfile.write('audio/4cos.wav', fs, fy/50)
 
 
 #--------------------------------------------------------------------#
@@ -185,7 +207,7 @@ for freq in freqs:
 #--------------------------------------------------------------------#
 
 if(task_detect(task_list,8)):
-    z, p, k = tf2zpk(filt_b, filt_a)
+    z, p, k = signal.tf2zpk(filt_b, filt_a)
 
     plt.figure(figsize=(4,3.5))
 
@@ -214,7 +236,7 @@ if(task_detect(task_list,8)):
 
 
 if(task_detect(task_list,9)):
-    w, H = freqz(filt_b, filt_a)
+    w, H = signal.freqz(filt_b, filt_a)
     _, ax = plt.subplots(1, 2, figsize=(8, 3))
     ax[0].plot(w / 2 / np.pi * fs, np.abs(H))
     ax[0].set_xlabel('Frequency [Hz]')
@@ -237,7 +259,7 @@ if(task_detect(task_list,9)):
 #--------------------------------------------------------------------#
 
 if(task_detect(task_list,10)):
-    filtered_data = filtfilt(filt_b, filt_a, filtered_data)
+    filtered_data = signal.filtfilt(filt_b, filt_a, filtered_data)
     wavfile.write('audio/clean_bandstop.wav', fs, np.real(filtered_data))
     plt.plot(filtered_data)
     plt.draw()
