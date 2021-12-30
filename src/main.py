@@ -186,7 +186,7 @@ if(task_detect(task_list, 6)):
 #--------------------------------------------------------------------#
 
 wp_segment = 50
-ws_segment = 5
+ws_segment = 10
 
 filtered_data = data
 filt_a = 1
