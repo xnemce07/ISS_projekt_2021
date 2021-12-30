@@ -106,18 +106,22 @@ spec_axis = np.arange(0, fs, fs/len(spec))
 my_spec = myDFT(data_matrix[segment_index])
 
 if(task_detect(task_list, 3)):
-    plt.plot(spec_axis[:len(spec)//2], np.abs(spec[:len(spec)//2]))
-    plt.xlabel('Frequency [Hz]')
-    plt.draw()
-    plt.savefig(f'out/segment_{segment_index}-spectral_analysis.png')
-    plt.show()
+    _, ax = plt.subplots(1, 2, figsize=(9, 4))
+    ax[0].plot(spec_axis[:len(spec)//2], np.abs(my_spec[:len(spec)//2]))
+    ax[0].set_xlabel('Frequency [Hz]')
+    ax[0].set_title('My implementation of DFT')
 
-    plt.plot(spec_axis[:len(spec)//2], np.abs(my_spec[:len(spec)//2]))
-    plt.xlabel('Frequency [Hz]')
-    plt.draw()
-    plt.savefig(f'out/segment_{segment_index}-spectral_analysis_mine.png')
-    plt.show()
+    ax[1].plot(spec_axis[:len(spec)//2], np.abs(spec[:len(spec)//2]))
+    ax[1].set_xlabel('Frequency [Hz]')
+    ax[1].set_title('Library implementation of FFT')
 
+    for ax1 in ax:
+        ax1.grid(alpha=0.5, linestyle='--')
+
+    plt.tight_layout()
+    plt.draw()
+    plt.savefig('out/DFTvsFFT.png')
+    plt.show()
 #--------------------------------------------------------------------#
 #-------------------------------TASK 4-------------------------------#
 #--------------------------------------------------------------------#
