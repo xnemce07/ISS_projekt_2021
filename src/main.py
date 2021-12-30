@@ -174,7 +174,7 @@ if(task_detect(task_list, 6)):
     plt.ylabel('Frequency [Hz]')
     cbar = plt.colorbar()
     cbar.set_label(
-        'Spectral power density - 4 cos [dB]', rotation=270, labelpad=15)
+        'Spectral power density[dB]', rotation=270, labelpad=15)
     plt.draw()
     plt.savefig('out/4cos_spectral_power_density.png')
     plt.show()
