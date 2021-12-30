@@ -199,6 +199,20 @@ for freq in freqs:
     filt_a = np.convolve(filt_a, a)
     filt_b = np.convolve(filt_b, b)
 
+if(task_detect(task_list,7)):
+    N_imp = 64
+    imp = [1, *np.zeros(N_imp-1)]
+    h = signal.lfilter(b, a, imp)
+    plt.figure(figsize=(10,3))
+    plt.stem(np.arange(N_imp), h, basefmt=' ')
+    plt.gca().set_xlabel('$n$')
+
+    plt.grid(alpha=0.5, linestyle='--')
+
+    plt.tight_layout()
+    plt.draw()
+    plt.savefig('out/Filter impulse response')
+    plt.show()
 
 #--------------------------------------------------------------------#
 #-------------------------------TASK 8-------------------------------#
