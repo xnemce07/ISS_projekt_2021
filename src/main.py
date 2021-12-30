@@ -240,7 +240,7 @@ def main():
 
         plt.tight_layout()
         plt.draw()
-        plt.savefig('out/filter-zeroaes_and_poles.png')
+        plt.savefig('out/filter-zeroes_and_poles.png')
         plt.show()
 
     #--------------------------------------------------------------------#
@@ -286,4 +286,3 @@ def main():
     return 0
 
 
-main()
