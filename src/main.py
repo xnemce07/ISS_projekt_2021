@@ -188,7 +188,6 @@ if(task_detect(task_list, 6)):
 wp_segment = 50
 ws_segment = 10
 
-filtered_data = data
 filt_a = 1
 filt_b = 1
 
@@ -257,7 +256,7 @@ if(task_detect(task_list,9)):
 #--------------------------------------------------------------------#
 
 if(task_detect(task_list,10)):
-    filtered_data = signal.filtfilt(filt_b, filt_a, filtered_data)
+    filtered_data = signal.filtfilt(filt_b, filt_a, data)
 
     filtered_data = filtered_data-np.mean(filtered_data)
     filtered_data = filtered_data / max(np.abs(filtered_data))
