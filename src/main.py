@@ -3,7 +3,6 @@ import numpy as np
 from scipy import signal
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
-#from scipy.signal import spectrogram, freqz, filtfilt, tf2zpk
 import cmath as cm
 
 
@@ -61,7 +60,6 @@ if(task_detect(task_list, 1)):
     print(f'MIN VALUE: {min(data)}')
     plt.plot(x_axis_whole, data)
     plt.xlabel('Seconds')
-    plt.title('xnemce07.wav')
     plt.draw()
     plt.savefig('out/plot-xnemce07.png')
     plt.show()
@@ -78,7 +76,6 @@ if(task_detect(task_list, 2)):
     plt.plot(x_axis_whole, data)
     plt.ylim(-1, 1)
     plt.xlabel('Seconds')
-    plt.title('xnemce07.wav - normalized')
     plt.savefig('out/plot_normalized-xnemce07.png')
     plt.draw()
     plt.show()
@@ -95,7 +92,6 @@ if(task_detect(task_list, 2)):
     plt.plot(x_axis_segment, data_matrix[segment_index])
     plt.ylim(-1, 1)
     plt.xlabel('Time [s]')
-    plt.title(f'xnemce07.wav - segment {segment_index}')
     plt.savefig(f'out/plot_segment_{segment_index}-xnemce07.png')
     plt.draw()
     plt.show()
@@ -112,14 +108,12 @@ my_spec = myDFT(data_matrix[segment_index])
 if(task_detect(task_list, 3)):
     plt.plot(spec_axis[:len(spec)//2], np.abs(spec[:len(spec)//2]))
     plt.xlabel('Frequency [Hz]')
-    plt.title(f'segment {segment_index} - spectral analysis')
     plt.draw()
     plt.savefig(f'out/segment_{segment_index}-spectral_analysis.png')
     plt.show()
 
     plt.plot(spec_axis[:len(spec)//2], np.abs(my_spec[:len(spec)//2]))
     plt.xlabel('Frequency [Hz]')
-    plt.title(f'MY segment {segment_index} - My spectral analysis')
     plt.draw()
     plt.savefig(f'out/segment_{segment_index}-spectral_analysis_mine.png')
     plt.show()
@@ -217,7 +211,7 @@ if(task_detect(task_list,8)):
 
 
     plt.scatter(np.real(z), np.imag(z), marker='o', facecolors='none', edgecolors='r', label='zeroes')
-    plt.scatter(np.real(p), np.imag(p), marker='x', color='g', label='ples')
+    plt.scatter(np.real(p), np.imag(p), marker='x', color='g', label='poles')
 
     plt.gca().set_xlabel('Real part $\mathbb{R}\{$z$\}$')
     plt.gca().set_ylabel('Imaginary part $\mathbb{I}\{$z$\}$')
@@ -237,7 +231,7 @@ if(task_detect(task_list,8)):
 
 if(task_detect(task_list,9)):
     w, H = signal.freqz(filt_b, filt_a)
-    _, ax = plt.subplots(1, 2, figsize=(8, 3))
+    _, ax = plt.subplots(1, 2, figsize=(9, 4))
     ax[0].plot(w / 2 / np.pi * fs, np.abs(H))
     ax[0].set_xlabel('Frequency [Hz]')
     ax[0].set_title('Modulus of filter frequency response $|H(e^{j\omega})|$')
@@ -260,8 +254,12 @@ if(task_detect(task_list,9)):
 
 if(task_detect(task_list,10)):
     filtered_data = signal.filtfilt(filt_b, filt_a, filtered_data)
+
+    filtered_data = filtered_data-np.mean(filtered_data)
+    filtered_data = filtered_data / max(np.abs(filtered_data))
+
     wavfile.write('audio/clean_bandstop.wav', fs, np.real(filtered_data))
-    plt.plot(filtered_data)
+    plt.plot(x_axis_whole, filtered_data)
     plt.draw()
     plt.savefig('out/clean_signal.png')
     plt.show()
