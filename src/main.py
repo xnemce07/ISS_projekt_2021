@@ -238,7 +238,7 @@ if(task_detect(task_list,8)):
 
     plt.tight_layout()
     plt.draw()
-    plt.savefig('out/filter-zeroaes_and_poles.png')
+    plt.savefig('out/filter-zeroes_and_poles.png')
     plt.show()
 
 #--------------------------------------------------------------------#
